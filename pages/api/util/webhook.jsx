@@ -14,8 +14,14 @@ export default async function webhook(req, res) {
       return res.status(400).json({ error: 'Invalid payload structure' });
     }
 
-    // Discord webhook URL
-    const webhookUrl = 'https://discord.com/api/webhooks/1383556276243529821/Z37V0O9GynSvs9QWXCpCxYGINmTjCpvskRPZ0EIbKyJDVWkZ2EniLq3U5TNVA3YL67Kp';
+    // Discord webhook URL from environment variables
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
+    // Check if webhook URL is configured
+    if (!webhookUrl) {
+      console.error('DISCORD_WEBHOOK_URL environment variable is not set');
+      return res.status(500).json({ error: 'Webhook URL not configured' });
+    }
 
     // Send to Discord with proper headers and error handling
     const response = await axios.post(webhookUrl, payload, {
@@ -48,7 +54,7 @@ export default async function webhook(req, res) {
     if (error.response) {
       const status = error.response.status;
       const discordError = error.response.data;
-
+      
       if (status === 400) {
         return res.status(400).json({ 
           error: 'Invalid request to Discord API',
